@@ -5,7 +5,7 @@ from collections import namedtuple
 import operator
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# from data_structures import SegmentTree, MinSegmentTree, SumSegmentTree
+# from data_structures import SegmentTree, MinSegmentTree, SumSegmentTree 经验池回放
 
 
 class ExperienceReplayMemory:
