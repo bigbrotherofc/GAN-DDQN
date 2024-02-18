@@ -1,10 +1,12 @@
 import torch, time, os, pickle, glob, math, json
+import datetime
 import numpy as np
 import csv
 from timeit import default_timer as timer 
 from datetime import timedelta
 import itertools
 import pandas as pd
+from numpy.random import default_rng
 
 # simulation environment
 from cellular_env import cellularEnv
@@ -21,7 +23,7 @@ import torchvision.transforms as T
 from utils.ReplayMemory import ExperienceReplayMemory, PrioritizedReplayMemory
 # from utils.wrappers import *
 from utils.utils import initialize_weights
-
+path = './data/GANDDQN/result_10M_1M_LURLLC_{}.npz'.format(datetime.date.today().strftime('%Y-%m-%d'))
 
 #%%
 class Generator(nn.Module):
@@ -426,11 +428,19 @@ def plot_rewards(rewards):
     plt.ylabel('Duration')
     plt.plot(rewards.cumsum())
     plt.pause(0.001)
-
-
+def plot_utilitys(utilitys):
+    plt.figure(1)
+    plt.clf()
+    utilitys = np.array(utilitys)
+    plt.title('Trained')
+    plt.xlabel('Episode')
+    plt.ylabel('Duration')
+    plt.plot(utilitys)
+    plt.show()
 # torch.cuda.manual_seed(100)
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 device = torch.device('cuda')
+rng = default_rng(seed = 0)
 # exploration_fraction = 0.3
 # exploration_start = 0.
 total_timesteps = 10000
@@ -475,7 +485,7 @@ print(observation)
 
 log = {}
 rewards = []
-uyilitys = [0.]
+utilitys = [0.]
 observations = []
 actions = []
 SE = []
@@ -509,7 +519,7 @@ for frame in range(1, total_timesteps + 1):
     QoE.append(qoe.tolist())
     SE.append(se[0])
     rewards.append(reward)
-    uyilitys.append(utility)
+    utilitys.append(utility)
 
     observation = state_update(env.tx_pkt_no, env.ser_cat)
     print(observation)
@@ -534,10 +544,26 @@ for frame in range(1, total_timesteps + 1):
         log['QoE'] = QoE
         log['reward'] = rewards
 
-        f = open('./log/GANDDQN/log_10M_1M_LURLLC.txt', 'w')
-        f.write(json.dumps(log))
-        f.close()
-    
+        # f = open('./log/GANDDQN/log_10M_1M_LURLLC.txt', 'w')
+        # f.write(json.dumps(log))
+        # f.close()
+output = {
+    'rewards': rewards,
+    'utilitys': utilitys,
+    'observations':observations,
+    'actions': actions,
+    'SE': SE,
+    'QoE': QoE
+}
+if not os.path.isdir(path):
+    try:
+        os.makedirs(path)
+    except OSError:
+        print('create file path failed{}'.format(path))
+    else:
+        print('create file path success{}'.format(path))
+np.savez(path, **output)
 print('Complete')
 plt.ioff()
 plt.show()
+plot_utilitys(utilitys)

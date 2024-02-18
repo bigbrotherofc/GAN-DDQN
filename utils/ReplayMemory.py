@@ -16,7 +16,7 @@ class ExperienceReplayMemory:
     def push(self, transition):
         self.memory.append(transition)
         if len(self.memory) > self.capacity:
-            del self.memory[0]
+            del self.memory[0] #先进先出
 
     def shuffle_memory(self):
         return np.random.permutation(self.memory)

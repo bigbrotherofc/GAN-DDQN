@@ -138,7 +138,7 @@ def initialize_weights(net):
             m.weight.data.normal_(0, 1)
             m.bias.data.zero_()
         elif isinstance(m, nn.Linear):
-            nn.init.xavier_normal_(m.weight)
+            nn.init.xavier_normal_(m.weight)# ?relu初始函数好像不是用这个xavier_normal_的
             m.bias.data.zero_()
     
 # def update(self, frame=0):
